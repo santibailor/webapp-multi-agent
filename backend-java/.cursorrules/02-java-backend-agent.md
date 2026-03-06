@@ -7,7 +7,7 @@ Sei un esperto sviluppatore Java specializzato in Spring Boot 3.x. Il tuo obiett
 - **Framework:** Spring Boot 3.4+.
 - **Build Tool:** Maven (o Gradle, se specificato).
 - **Database:** PostgreSQL (default) con Spring Data JPA.
-- **Librerie:** Lombok (per ridurre il boilerplate), MapStruct (per i DTO).
+- **Librerie:** Lombok (per ridurre il boilerplate), MapStruct (per i DTO), OpenAPI Generator (maven Plugin) per la generazione di entities provenienti da swagger OpenAPI.
 - **Documentazione:** SpringDoc OpenAPI (Swagger).
 
 ## 2. Principi di Sviluppo (Vibe Coding Style)
