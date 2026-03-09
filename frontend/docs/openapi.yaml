@@ -1,0 +1,306 @@
+openapi: 3.0.3
+info:
+  title: Helix Auto Sostitutiva API
+  version: 1.0.0
+  description: API per la gestione delle richieste e prenotazioni di auto sostitutive secondo i mockup forniti.
+servers:
+  - url: /api/v1
+paths:
+  /customer/requests:
+    get:
+      summary: Storico richieste auto sostitutiva del cliente
+      tags:
+        - Customer
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          description: Lista paginata delle richieste del cliente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerRequestPage'
+    post:
+      summary: Crea una nuova richiesta di auto sostitutiva
+      tags:
+        - Customer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewCustomerRequest'
+      responses:
+        '201':
+          description: Richiesta creata con successo
+        '400':
+          description: Dati non validi
+        '500':
+          description: Errore del server
+          
+  /operator/dashboard/stats:
+    get:
+      summary: Statistiche globali per l'operatore
+      tags:
+        - Operator
+      responses:
+        '200':
+          description: KPI della dashboard operatore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorStats'
+
+  /operator/requests:
+    get:
+      summary: Lista di tutte le richieste (vista operatore)
+      tags:
+        - Operator
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/SizeParam'
+        - $ref: '#/components/parameters/SortParam'
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Filtro di ricerca testuale
+      responses:
+        '200':
+          description: Lista paginata delle richieste per l'operatore
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorRequestPage'
+
+  /operator/vehicles/search:
+    get:
+      summary: Ricerca auto sostitutive disponibili
+      tags:
+        - Operator
+      parameters:
+        - in: query
+          name: startDate
+          required: true
+          schema:
+            type: string
+            format: date
+        - in: query
+          name: endDate
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Lista delle auto disponibili
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailableCar'
+
+  /operator/bookings:
+    post:
+      summary: Prenota un'auto sostitutiva per un cliente
+      tags:
+        - Operator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewBooking'
+      responses:
+        '201':
+          description: Auto prenotata con successo
+        '400':
+          description: Errore validazione
+        '404':
+          description: Auto o Cliente non trovato
+
+components:
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Numero di pagina (0-based)
+      schema:
+        type: integer
+        default: 0
+    SizeParam:
+      name: size
+      in: query
+      description: Dimensione della pagina
+      schema:
+        type: integer
+        default: 10
+    SortParam:
+      name: sort
+      in: query
+      description: Criterio di ordinamento (es. id,desc)
+      schema:
+        type: string
+
+  schemas:
+    CustomerRequestPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomerRequest'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    OperatorRequestPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatorRequest'
+        totalElements:
+          type: integer
+        totalPages:
+          type: integer
+
+    CustomerRequest:
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID Univoco o Seriale della richiesta (es. 00001)
+        plate:
+          type: string
+        vehicle:
+          type: string
+        fuel:
+          type: string
+          description: Alimentazione (es. Diesel, Benzina)
+        deliveryDate:
+          type: string
+          format: date
+        returnDate:
+          type: string
+          format: date
+        status:
+          type: string
+          enum: [In attesa, In consegna, Consegnata, Rifiutato]
+
+    OperatorRequest:
+      allOf:
+        - $ref: '#/components/schemas/CustomerRequest'
+        - type: object
+          properties:
+            customerName:
+              type: string
+
+    NewCustomerRequest:
+      type: object
+      required:
+        - replacedVehiclePlate
+        - deliveryType
+        - customerInfo
+      properties:
+        replacedVehiclePlate:
+          type: string
+          description: Targa del veicolo da sostituire
+        options:
+          $ref: '#/components/schemas/RequestOptions'
+        deliveryType:
+          type: string
+          enum: [POINT_OF_DELIVERY, HOME_DELIVERY]
+        customerInfo:
+          $ref: '#/components/schemas/CustomerInfo'
+
+    RequestOptions:
+      type: object
+      properties:
+        gearbox:
+          type: string
+          enum: [Automatico, Manuale]
+        snowChains:
+          type: boolean
+        doubleKeys:
+          type: boolean
+        isofix:
+          type: boolean
+        notes:
+          type: string
+          description: Note libere (es. 'Necessito di un'auto con 7 posti...')
+
+    CustomerInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+          description: Indirizzo per la consegna a casa, se applicabile.
+
+    OperatorStats:
+      type: object
+      properties:
+        totalReplacedCars:
+          type: integer
+        totalRequests:
+          type: integer
+        totalExpenses:
+          type: number
+          format: float
+          description: Spese totali in Euro
+
+    AvailableCar:
+      type: object
+      properties:
+        plate:
+          type: string
+        brand:
+          type: string
+        model:
+          type: string
+        type:
+          type: string
+          description: Tipologia (es. City Car, Berlina)
+        seats:
+          type: integer
+        fuel:
+          type: string
+        gearbox:
+          type: string
+        price:
+          type: number
+          format: float
+          description: Costo per il periodo selezionato
+
+    NewBooking:
+      type: object
+      required:
+        - customerEmail
+        - replacedVehiclePlate
+        - startDate
+        - endDate
+        - carPlate
+      properties:
+        customerEmail:
+          type: string
+        replacedVehiclePlate:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        carPlate:
+          type: string

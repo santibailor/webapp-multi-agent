@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/backend-java/target/generated-sources/generated-sources.iml" filepath="$PROJECT_DIR$/backend-java/target/generated-sources/generated-sources.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend-java/src/main/main.iml" filepath="$PROJECT_DIR$/backend-java/src/main/main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend-java/target/generated-sources/openapi/openapi.iml" filepath="$PROJECT_DIR$/backend-java/target/generated-sources/openapi/openapi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/backend-java/src/test/test.iml" filepath="$PROJECT_DIR$/backend-java/src/test/test.iml" />
+    </modules>
+  </component>
+</project>
